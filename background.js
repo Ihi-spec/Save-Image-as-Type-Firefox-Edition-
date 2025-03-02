@@ -18,7 +18,7 @@ if (!browser.i18n?.getMessage) {
 
 function download(url, filename) {
 	browser.downloads.download(
-		{ url, filename, saveAs: true },
+		{ url, filename + ".png", saveAs: true },
 		function(downloadId) {
 			if (!downloadId) {
 				let msg = browser.i18n.getMessage('errorOnSaving');
