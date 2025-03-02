@@ -1,11 +1,11 @@
 let messages;
 
-// some old chrome doesn't support chrome.i18n.getMessage in service worker.
-if (!chrome.i18n?.getMessage) {
-	if (!chrome.i18n) {
-		chrome.i18n = {};
+// some old chrome doesn't support browser.i18n.getMessage in service worker.
+if (!browser.i18n?.getMessage) {
+	if (!browser.i18n) {
+		browser.i18n = {};
 	}
-	chrome.i18n.getMessage = (key, args) => {
+	browser.i18n.getMessage = (key, args) => {
 		if (key == 'View_in_store') {
 			return 'View in store';
 		}
@@ -17,13 +17,13 @@ if (!chrome.i18n?.getMessage) {
 }
 
 function download(url, filename) {
-	chrome.downloads.download(
+	browser.downloads.download(
 		{ url, filename, saveAs: true },
 		function(downloadId) {
 			if (!downloadId) {
-				let msg = chrome.i18n.getMessage('errorOnSaving');
-				if (chrome.runtime.lastError) {
-					msg += ': \n'+ chrome.runtime.lastError.message;
+				let msg = browser.i18n.getMessage('errorOnSaving');
+				if (browser.runtime.lastError) {
+					msg += ': \n'+ browser.runtime.lastError.message;
 				}
 				notify(msg);
 			}
@@ -82,7 +82,7 @@ function getSuggestedFilename(src, type) {
 
 function notify(msg) {
 	if (msg.error) {
-		msg = (chrome.i18n.getMessage(msg.error) || msg.error) + '\n'+ (msg.srcUrl || msg.src);
+		msg = (browser.i18n.getMessage(msg.error) || msg.error) + '\n'+ (msg.srcUrl || msg.src);
 	}
 }
 
@@ -90,14 +90,14 @@ function loadMessages() {
 	if (!messages) {
 		messages = {};
 		['errorOnSaving', 'errorOnLoading'].forEach(key => {
-			messages[key] = chrome.i18n.getMessage(key);
+			messages[key] = browser.i18n.getMessage(key);
 		});
 	}
 	return messages;
 }
 
 async function hasOffscreenDocument(path) {
-	const offscreenUrl = chrome.runtime.getURL(path);
+	const offscreenUrl = browser.runtime.getURL(path);
 	const matchedClients = await clients.matchAll();
 	for (const client of matchedClients) {
 		if (client.url === offscreenUrl) {
@@ -107,30 +107,30 @@ async function hasOffscreenDocument(path) {
 	return false;
 }
 
-chrome.runtime.onInstalled.addListener(function () {
+browser.runtime.onInstalled.addListener(function () {
 	loadMessages();
 	['JPG','PNG','WebP'].forEach(function (type){
-		chrome.contextMenus.create({
+		browser.contextMenus.create({
 			"id" : "save_as_" + type.toLowerCase(),
-			"title" : chrome.i18n.getMessage("Save_as", [type]),
+			"title" : browser.i18n.getMessage("Save_as", [type]),
 			"type" : "normal",
 			"contexts" : ["image"],
 		});
 	});
-	chrome.contextMenus.create({
+	browser.contextMenus.create({
 		"id" : "sep_1",
 		"type" : "separator",
 		"contexts" : ["image"]
 	});
-	chrome.contextMenus.create({
+	browser.contextMenus.create({
 		"id" : "view_in_store",
-		"title" : chrome.i18n.getMessage("View_in_store"),
+		"title" : browser.i18n.getMessage("View_in_store"),
 		"type" : "normal",
 		"contexts" : ["image"],
 	});
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let {target, op} = message || {};
 	if (target == 'background' && op) {
 		if (op == 'download') {
@@ -139,7 +139,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		} else if (op == 'notify') {
 			let msg = message.message;
 			if (msg && msg.error) {
-				let msg2 = chrome.i18n.getMessage(msg.error) || msg.error;
+				let msg2 = browser.i18n.getMessage(msg.error) || msg.error;
 				if (msg.src) {
 					msg2 += '\n'+ msg.src;
 				}
@@ -153,11 +153,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	}
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+browser.contextMenus.onClicked.addListener(async (info, tab) => {
 	let {menuItemId, mediaType, srcUrl} = info;
 	let connectTab = () => {
 		// for old chrome v108-
-		let port = chrome.tabs.connect(
+		let port = browser.tabs.connect(
 			tab.id,
 			{
 				name: 'convertType',
@@ -172,10 +172,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 			let filename = getSuggestedFilename(srcUrl, type);
 			loadMessages();
 			let noChange = srcUrl.startsWith('data:image/' + (type == 'jpg' ? 'jpeg' : type) + ';');
-			if (!chrome.offscreen) {
+			if (!browser.offscreen) {
 				// for old chrome v108-
 				let frameIds = info.frameId ? [] : void 0;
-				await chrome.scripting.executeScript({
+				await browser.scripting.executeScript({
 					target: { tabId: tab.id, frameIds },
 					files: ["offscreen.js"], // content script and offscreen use the same file.
 				});
@@ -186,7 +186,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 					return;
 				}
 				// offscreen api need chrome v109+
-				if (!chrome.offscreen) {
+				if (!browser.offscreen) {
 					// for old chrome v108-
 					let port = connectTab();
 					await port.postMessage({ op: noChange ? 'download' : 'convertType', target: 'content', src: dataurl, type, filename });
@@ -199,23 +199,23 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 				}
 				const offscreenSrc = 'offscreen.html'
 				if (!(await hasOffscreenDocument(offscreenSrc))) {
-					await chrome.offscreen.createDocument({
-						url: chrome.runtime.getURL(offscreenSrc),
+					await browser.offscreen.createDocument({
+						url: browser.runtime.getURL(offscreenSrc),
 						reasons: ['DOM_SCRAPING'],
 						justification: 'Download a image for user',
 					});
 				}
-				await chrome.runtime.sendMessage({ op: 'convertType', target: 'offscreen', src: dataurl, type, filename });
+				await browser.runtime.sendMessage({ op: 'convertType', target: 'offscreen', src: dataurl, type, filename });
 			});
 			return;
 		} else {
-			notify(chrome.i18n.getMessage("errorIsNotImage"));
+			notify(browser.i18n.getMessage("errorIsNotImage"));
 		}
 		return;
 	}
 	if (menuItemId == 'view_in_store') {
-		let url = "https://chrome.google.com/webstore/detail/save-image-as-type/" + chrome.i18n.getMessage("@@extension_id");
-		chrome.tabs.create({ url: url, index: tab.index + 1 });
+		let url = "https://browser.google.com/webstore/detail/save-image-as-type/" + browser.i18n.getMessage("@@extension_id");
+		browser.tabs.create({ url: url, index: tab.index + 1 });
 		return;
 	}
 });
