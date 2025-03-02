@@ -24,7 +24,14 @@ browserAPI.contextMenus.create({
   id: "save-image-folder",
   title: "Save Image As...",
   contexts: ["image"]
+}, function() {
+  if (browser.runtime.lastError) {
+    console.error("Error creating context menu:", browser.runtime.lastError.message);
+  } else {
+    console.log("Context menu created successfully!");
+  }
 });
+
 
 function download(url, filename) {
 	browser.downloads.download(
