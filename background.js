@@ -136,7 +136,7 @@ browser.runtime.onInstalled.addListener(function () {
 		"id" : "view_in_store",
 		"title" : browser.i18n.getMessage("View_in_store"),
 		"type" : "normal",
-		"contexts" : ["image"],
+		"contexts" : ["image"]
 	});
 });
 
