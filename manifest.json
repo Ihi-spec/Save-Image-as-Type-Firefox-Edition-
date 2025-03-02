@@ -3,6 +3,7 @@
   "name": "Save Image as Type",
   "version": "1.0",
   "description": "Save images in different formats.",
+  "default_locale": "en",
   "permissions": [
     "contextMenus",
     "downloads",
