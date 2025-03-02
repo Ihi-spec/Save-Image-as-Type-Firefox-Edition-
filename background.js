@@ -1,5 +1,7 @@
 let messages;
 
+console.log("Background script loaded!");
+
 // some old chrome doesn't support browser.i18n.getMessage in service worker.
 if (!browser.i18n?.getMessage) {
 	if (!browser.i18n) {
@@ -15,6 +17,14 @@ if (!browser.i18n?.getMessage) {
 		return key;
 	};
 }
+
+const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+
+browserAPI.contextMenus.create({
+  id: "save-image-folder",
+  title: "Save Image As...",
+  contexts: ["image"]
+});
 
 function download(url, filename) {
 	browser.downloads.download(
