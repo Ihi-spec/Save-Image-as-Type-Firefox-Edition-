@@ -1,20 +1,25 @@
 {
-   "name": "__MSG_extName__",
-   "short_name": "__MSG_extShortName__",
-   "description": "__MSG_extDescription__",
-   "icons": {
-      "128": "icon-128.png",
-      "16": "icon-16.png",
-      "48": "icon-48.png"
-   },
-   "background": {
-      "service_worker": "background.js"
-   },
-   "default_locale": "en",
-   "manifest_version": 3,
-   "minimum_chrome_version": "88.0.0.0",
-   "permissions": [ "downloads", "contextMenus", "offscreen", "activeTab", "scripting" ],
-   "optional_permissions": [ ],
-   "host_permissions": [ "<all_urls>" ],
-   "version": "1.2.3"
+  "manifest_version": 2,
+  "name": "Save Image as Type",
+  "version": "1.0",
+  "description": "Save images in different formats.",
+  "permissions": [
+    "contextMenus",
+    "downloads",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "save-image-as-type@yourdomain.com"
+    }
+  }
 }
