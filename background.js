@@ -124,7 +124,7 @@ browser.runtime.onInstalled.addListener(function () {
 			"id" : "save_as_" + type.toLowerCase(),
 			"title" : browser.i18n.getMessage("Save_as", [type]),
 			"type" : "normal",
-			"contexts" : ["image"],
+			"contexts" : ["image"]
 		});
 	});
 	browser.contextMenus.create({
