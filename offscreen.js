@@ -45,10 +45,10 @@ function init() {
 	};
 
 	// work as offscreen
-	chrome.runtime.onMessage.addListener(handleMessages);
+	browser.runtime.onMessage.addListener(handleMessages);
 	
 	// work as content script for old chrome (v108-)
-	chrome.runtime.onConnect.addListener(port => {
+	browser.runtime.onConnect.addListener(port => {
 		if (port.name == 'convertType') {
 			workAsContent = true;
 			contentPort = port;
@@ -62,7 +62,7 @@ function notify(message) {
 		alert(message);
 		return;
 	}
-	chrome.runtime.sendMessage({op: 'notify', target: 'background', message});
+	browser.runtime.sendMessage({op: 'notify', target: 'background', message});
 }
 
 function download(url, filename) {
@@ -73,7 +73,7 @@ function download(url, filename) {
 		a.click();
 		return;
 	}
-	chrome.runtime.sendMessage({op: 'download', target: 'background', url, filename});
+	browser.runtime.sendMessage({op: 'download', target: 'background', url, filename});
 }
 
 function convertImageAsType(src, filename, type) {
